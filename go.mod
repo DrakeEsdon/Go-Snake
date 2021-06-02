@@ -1,3 +1,5 @@
-module github.com/BattlesnakeOfficial/starter-snake-go
+module github.com/DrakeEsdon/Go-Snake
 
 go 1.13
+
+require github.com/stretchr/testify v1.7.0
