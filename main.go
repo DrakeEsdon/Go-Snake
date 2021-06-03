@@ -125,7 +125,7 @@ func borderCheck(you Battlesnake, gameState Board) []string {
 		}
 		directions := []string{}
 		directions = append(directions, "up")
-		directions = append(directions, "right")
+		directions = append(directions, "left")
 		directions = append(directions, "down")
 		return directions
 	}
