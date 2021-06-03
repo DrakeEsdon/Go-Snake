@@ -90,7 +90,7 @@ func HandleStart(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func boarderCheck(you Battlesnake, gameState Board) []string {
+func borderCheck(you Battlesnake, gameState Board) []string {
 	if you.Head.X == 0 { //left wall
 		if you.Head.Y == 0 { //accounting for the corners (bottom left
 			directions := []string{}
@@ -162,7 +162,7 @@ func HandleMove(w http.ResponseWriter, r *http.Request) {
 	}
 	var gameState Board = request.Board
 	var you Battlesnake = request.You
-	availableMoves := boarderCheck(you, gameState)
+	availableMoves := borderCheck(you, gameState)
 
 	move := availableMoves[rand.Intn(len(availableMoves))]
 
