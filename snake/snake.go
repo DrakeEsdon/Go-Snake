@@ -56,12 +56,13 @@ func borderCheck(you datatypes.Battlesnake, board datatypes.Board, availableMove
 }
 
 func removeDirection(s []datatypes.Direction, r datatypes.Direction) []datatypes.Direction {
+	var resultDirs []datatypes.Direction
 	for i, v := range s {
-		if v == r {
-			return append(s[:i], s[i+1:]...)
+		if v != r {
+			resultDirs = append(resultDirs, s[i])
 		}
 	}
-	return s
+	return resultDirs
 }
 
 func stopHittingYourself(you datatypes.Battlesnake, avaliableDirections []datatypes.Direction) []datatypes.Direction{
