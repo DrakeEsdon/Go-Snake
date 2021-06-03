@@ -151,6 +151,35 @@ func borderCheck(you Battlesnake, gameState Board) []string {
 	return directions
 }
 
+func remove(s []string, r string) []string {
+	for i, v := range s {
+		if v == r {
+			return append(s[:i], s[i+1:]...)
+		}
+	}
+	return s
+}
+
+func stopHittingYourself(you Battlesnake, avaliableDirections []string)[]string{
+	if you.Body[0].X > you.Body[1].X{
+		avaliableDirections = remove(avaliableDirections, "left")
+		return avaliableDirections
+	}
+	if you.Body[0].X < you.Body[1].X{
+		avaliableDirections = remove(avaliableDirections, "right")
+		return avaliableDirections
+	}
+	if you.Body[0].Y > you.Body[1].Y{
+		avaliableDirections = remove(avaliableDirections, "down")
+		return avaliableDirections
+	}
+	if you.Body[0].Y < you.Body[1].Y{
+		avaliableDirections = remove(avaliableDirections, "up")
+		return avaliableDirections
+	}
+	return avaliableDirections
+}
+
 // HandleMove is called for each turn of each game.
 // Valid responses are "up", "down", "left", or "right".
 // TODO: Use the information in the GameRequest object to determine your next move.
@@ -163,6 +192,7 @@ func HandleMove(w http.ResponseWriter, r *http.Request) {
 	var gameState Board = request.Board
 	var you Battlesnake = request.You
 	availableMoves := borderCheck(you, gameState)
+	availableMoves = stopHittingYourself(you, availableMoves)
 
 	move := availableMoves[rand.Intn(len(availableMoves))]
 
