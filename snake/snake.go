@@ -41,16 +41,16 @@ func ChooseMove(g datatypes.GameRequest) string {
 
 func borderCheck(you datatypes.Battlesnake, board datatypes.Board, availableMoves []datatypes.Direction) []datatypes.Direction {
 	if isTopEdge(you.Head, board) {
-		removeDirection(availableMoves, datatypes.DirectionUp)
+		availableMoves = removeDirection(availableMoves, datatypes.DirectionUp)
 	}
 	if isRightEdge(you.Head, board) {
-		removeDirection(availableMoves, datatypes.DirectionRight)
+		availableMoves = removeDirection(availableMoves, datatypes.DirectionRight)
 	}
 	if isBottomEdge(you.Head, board) {
-		removeDirection(availableMoves, datatypes.DirectionDown)
+		availableMoves = removeDirection(availableMoves, datatypes.DirectionDown)
 	}
 	if isLeftEdge(you.Head, board) {
-		removeDirection(availableMoves, datatypes.DirectionLeft)
+		availableMoves = removeDirection(availableMoves, datatypes.DirectionLeft)
 	}
 	return availableMoves
 }
