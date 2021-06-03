@@ -1,12 +1,14 @@
 package datatypes
 
-type Direction uint8
+type Vector Coord
 
-const (
-	DirectionUp    Direction = iota
-	DirectionRight Direction = iota
-	DirectionDown  Direction = iota
-	DirectionLeft  Direction = iota
+type Direction Vector
+
+var (
+	DirectionUp    = Direction{X:  0, Y:  1}
+	DirectionRight = Direction{X:  1, Y:  0}
+	DirectionDown  = Direction{X:  0, Y: -1}
+	DirectionLeft  = Direction{X: -1, Y:  0}
 )
 
 var AllDirections = []Direction{DirectionUp, DirectionRight, DirectionDown, DirectionLeft}
@@ -25,4 +27,11 @@ func DirectionToStr(d Direction) string {
 		return "left"
 	}
 	return "up"
+}
+
+func AddDirectionToCoord(coord Coord, dir Direction) Coord {
+	return Coord{
+		X: coord.X + dir.X,
+		Y: coord.Y + dir.Y,
+	}
 }

@@ -66,14 +66,18 @@ func removeDirection(s []datatypes.Direction, r datatypes.Direction) []datatypes
 }
 
 func stopHittingYourself(you datatypes.Battlesnake, avaliableDirections []datatypes.Direction) []datatypes.Direction{
-	if you.Body[0].X > you.Body[1].X{
-		avaliableDirections = removeDirection(avaliableDirections, datatypes.DirectionLeft)
-	} else if you.Body[0].X < you.Body[1].X{
-		avaliableDirections = removeDirection(avaliableDirections, datatypes.DirectionRight)
-	} else if you.Body[0].Y > you.Body[1].Y{
-		avaliableDirections = removeDirection(avaliableDirections, datatypes.DirectionDown)
-	} else if you.Body[0].Y < you.Body[1].Y{
-		avaliableDirections = removeDirection(avaliableDirections, datatypes.DirectionUp)
+	var excludedDirections []datatypes.Direction
+	for _, dir := range avaliableDirections {
+		nextCoord := datatypes.AddDirectionToCoord(you.Head, dir)
+		for _, bodyCoord := range you.Body {
+			if nextCoord == bodyCoord {
+				excludedDirections = append(excludedDirections, dir)
+				break
+			}
+		}
+	}
+	for _, dir := range excludedDirections {
+		avaliableDirections = removeDirection(avaliableDirections, dir)
 	}
 	return avaliableDirections
 }
