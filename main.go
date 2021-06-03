@@ -98,7 +98,7 @@ func borderCheck(you Battlesnake, gameState Board) []string {
 			directions = append(directions, "right")
 			return directions
 		}
-		if you.Head.Y == gameState.Height { //top left corner
+		if you.Head.Y == gameState.Height-1 { //top left corner
 			directions := []string{}
 			directions = append(directions, "down")
 			directions = append(directions, "right")
@@ -110,14 +110,14 @@ func borderCheck(you Battlesnake, gameState Board) []string {
 		directions = append(directions, "down")
 		return directions
 	}
-	if you.Head.X == gameState.Width { //right wall
+	if you.Head.X == gameState.Width-1 { //right wall
 		if you.Head.Y == 0 { //bottom right corner
 			directions := []string{}
 			directions = append(directions, "up")
 			directions = append(directions, "left")
 			return directions
 		}
-		if you.Head.Y == gameState.Height { //top right corner
+		if you.Head.Y == gameState.Height-1 { //top right corner
 			directions := []string{}
 			directions = append(directions, "down")
 			directions = append(directions, "left")
@@ -136,7 +136,7 @@ func borderCheck(you Battlesnake, gameState Board) []string {
 		directions = append(directions, "right")
 		return directions
 	}
-	if you.Head.Y == gameState.Height { //top wall
+	if you.Head.Y == gameState.Height-1 { //top wall
 		directions := []string{}
 		directions = append(directions, "down")
 		directions = append(directions, "left")
