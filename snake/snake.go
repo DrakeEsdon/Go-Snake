@@ -71,7 +71,7 @@ func stopHittingYourself(you datatypes.Battlesnake, avaliableDirections []dataty
 		nextCoord := datatypes.AddDirectionToCoord(you.Head, dir)
 		tail := you.Body[you.Length-1]
 		for _, bodyCoord := range you.Body {
-			if nextCoord == bodyCoord && nextCoord != tail{
+			if nextCoord == bodyCoord && nextCoord != tail || nextCoord == bodyCoord && you.Length < 3 {
 				excludedDirections = append(excludedDirections, dir)
 				break
 			}
