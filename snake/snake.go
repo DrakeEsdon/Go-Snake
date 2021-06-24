@@ -7,6 +7,8 @@ import (
 	"math/rand"
 )
 
+var turnsSinceEating = 0
+
 func ChooseMove(request datatypes.GameRequest) (string, string) {
 	var move *datatypes.Direction
 
@@ -28,7 +30,17 @@ func ChooseMove(request datatypes.GameRequest) (string, string) {
 		move = &moveValue
 	}
 
+	destCoord := datatypes.AddDirectionToCoord(request.You.Head, *move)
+	if datatypes.IsFood(destCoord, request.Board) {
+		turnsSinceEating = 0
+	}
+	turnsSinceEating += 1
+
 	return datatypes.DirectionToStr(*move), "🤤"
+}
+
+func canGoForTail() bool {
+	return turnsSinceEating > 1
 }
 
 func AnyOtherMove(request datatypes.GameRequest) datatypes.Direction {
@@ -54,7 +66,7 @@ func AnyOtherMove(request datatypes.GameRequest) datatypes.Direction {
 }
 
 func GoToFood(request *datatypes.GameRequest) *datatypes.Direction {
-	graph := dijkstra.GetDijkstraGraph(request)
+	graph := dijkstra.GetDijkstraGraph(request, canGoForTail())
 
 	head := request.You.Head
 	var food datatypes.Coord
@@ -71,7 +83,7 @@ func GoToFood(request *datatypes.GameRequest) *datatypes.Direction {
 }
 
 func FollowTail(request *datatypes.GameRequest) *datatypes.Direction {
-	graph := dijkstra.GetDijkstraGraph(request)
+	graph := dijkstra.GetDijkstraGraph(request, canGoForTail())
 	head := request.You.Head
 	tail := request.You.Body[len(request.You.Body) - 1]
 	return dijkstra.GetDijkstraPathDirection(head, tail, graph)

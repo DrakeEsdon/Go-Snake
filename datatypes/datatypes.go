@@ -70,6 +70,15 @@ func IsSnakeOrHazard(coord Coord, board Board) bool {
 	return false
 }
 
+func IsFood(coord Coord, board Board) bool {
+	for _, food := range board.Food {
+		if coord == food {
+			return true
+		}
+	}
+	return false
+}
+
 func IsOutOfBounds(coord Coord, board Board) bool {
 	x := coord.X
 	y := coord.Y

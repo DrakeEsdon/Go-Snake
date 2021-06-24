@@ -5,7 +5,7 @@ import (
 	"github.com/RyanCarrier/dijkstra"
 )
 
-func addGameStateToGraph(request *datatypes.GameRequest, g *dijkstra.Graph) *dijkstra.Graph {
+func addGameStateToGraph(request *datatypes.GameRequest, g *dijkstra.Graph, canGoToTail bool) *dijkstra.Graph {
 	board := &request.Board
 	for x := 0; x < board.Width; x++ {
 		for y := 0; y < board.Height; y++ {
@@ -14,7 +14,7 @@ func addGameStateToGraph(request *datatypes.GameRequest, g *dijkstra.Graph) *dij
 				coordB := datatypes.AddDirectionToCoord(coordA, direction)
 				if !datatypes.IsOutOfBounds(coordB, *board) &&
 					(!datatypes.IsSnakeOrHazard(coordB, *board) ||
-						datatypes.IsMyTail(coordB, request.You)) {
+					    (datatypes.IsMyTail(coordB, request.You) && canGoToTail)) {
 					g.AddMappedVertex(datatypes.CoordToString(coordA))
 					g.AddMappedVertex(datatypes.CoordToString(coordB))
 					err := g.AddMappedArc(
@@ -32,9 +32,9 @@ func addGameStateToGraph(request *datatypes.GameRequest, g *dijkstra.Graph) *dij
 	return g
 }
 
-func GetDijkstraGraph(request *datatypes.GameRequest) *dijkstra.Graph {
+func GetDijkstraGraph(request *datatypes.GameRequest, canGoForTail bool) *dijkstra.Graph {
 	graph := dijkstra.NewGraph()
-	graph = addGameStateToGraph(request, graph)
+	graph = addGameStateToGraph(request, graph, canGoForTail)
 	return graph
 }
 
