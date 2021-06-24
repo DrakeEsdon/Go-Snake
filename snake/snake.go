@@ -2,54 +2,79 @@ package snake
 
 import (
 	"github.com/DrakeEsdon/Go-Snake/datatypes"
+	"github.com/DrakeEsdon/Go-Snake/dijkstra"
 	"math/rand"
 )
 
-func isTopEdge(coord datatypes.Coord, board datatypes.Board) bool {
-	return coord.Y == board.Height - 1
+func ChooseMove(request datatypes.GameRequest) string {
+	var move *datatypes.Direction
+
+	if request.You.Health > 50 {
+		move = FollowTail(request)
+	} else {
+		move = GoToFood(request)
+	}
+
+	if move == nil {
+		moveValue := AnyOtherMove(request)
+		move = &moveValue
+	}
+
+	return datatypes.DirectionToStr(*move)
 }
 
-func isRightEdge(coord datatypes.Coord, board datatypes.Board) bool {
-	return coord.X == board.Width - 1
-}
-
-
-func isBottomEdge(coord datatypes.Coord, board datatypes.Board) bool {
-	_ = board
-	return coord.Y == 0
-}
-
-func isLeftEdge(coord datatypes.Coord, board datatypes.Board) bool {
-	_ = board
-	return coord.X == 0
-}
-
-func ChooseMove(g datatypes.GameRequest) string {
-	var gameState = g.Board
-	var you = g.You
+func AnyOtherMove(request datatypes.GameRequest) datatypes.Direction {
+	/*
+	A simple and buggy algorithm to use if all else fails. Tries not to hit itself
+	or run out of bounds.
+	 */
+	var board = request.Board
+	var you = request.You
 
 	availableMoves := datatypes.AllDirections
 
-	availableMoves = borderCheck(you, gameState, availableMoves)
+	availableMoves = borderCheck(you, board, availableMoves)
 
 	availableMoves = stopHittingYourself(you, availableMoves)
 
 	move := availableMoves[rand.Intn(len(availableMoves))]
 
-	return datatypes.DirectionToStr(move)
+	return move
+}
+
+func GoToFood(request datatypes.GameRequest) *datatypes.Direction {
+	graph := dijkstra.GetDijkstraGraph(request.Board)
+
+	head := request.You.Head
+	var food datatypes.Coord
+	var move *datatypes.Direction
+	for _, food = range request.Board.Food {
+		move = dijkstra.GetDijkstraPathDirection(head, food, graph)
+		if move != nil {
+			break
+		}
+	}
+	return move
+}
+
+func FollowTail(request datatypes.GameRequest) *datatypes.Direction {
+	graph := dijkstra.GetDijkstraGraph(request.Board)
+	head := request.You.Head
+	tail := request.You.Body[len(request.You.Body) - 1]
+	return dijkstra.GetDijkstraPathDirection(head, tail, graph)
 }
 
 func borderCheck(you datatypes.Battlesnake, board datatypes.Board, availableMoves []datatypes.Direction) []datatypes.Direction {
-	if isTopEdge(you.Head, board) {
+	if datatypes.IsTopEdge(you.Head, board) {
 		availableMoves = removeDirection(availableMoves, datatypes.DirectionUp)
 	}
-	if isRightEdge(you.Head, board) {
+	if datatypes.IsRightEdge(you.Head, board) {
 		availableMoves = removeDirection(availableMoves, datatypes.DirectionRight)
 	}
-	if isBottomEdge(you.Head, board) {
+	if datatypes.IsBottomEdge(you.Head, board) {
 		availableMoves = removeDirection(availableMoves, datatypes.DirectionDown)
 	}
-	if isLeftEdge(you.Head, board) {
+	if datatypes.IsLeftEdge(you.Head, board) {
 		availableMoves = removeDirection(availableMoves, datatypes.DirectionLeft)
 	}
 	return availableMoves
