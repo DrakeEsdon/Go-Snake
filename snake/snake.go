@@ -1,55 +1,91 @@
 package snake
 
 import (
+	"fmt"
 	"github.com/DrakeEsdon/Go-Snake/datatypes"
+	"github.com/DrakeEsdon/Go-Snake/dijkstra"
 	"math/rand"
 )
 
-func isTopEdge(coord datatypes.Coord, board datatypes.Board) bool {
-	return coord.Y == board.Height - 1
+func ChooseMove(request datatypes.GameRequest) (string, string) {
+	var move *datatypes.Direction
+
+	if request.Turn > 5 {
+		if request.You.Health > 50 {
+			fmt.Println("Health > 50, following tail")
+			move = FollowTail(&request)
+		} else {
+			fmt.Println("Health < 50, going for food")
+			move = GoToFood(&request)
+		}
+	}
+
+	if move == nil {
+		fmt.Println("Move was nil, doing any other move")
+		moveValue := AnyOtherMove(request)
+		move = &moveValue
+	}
+
+	return datatypes.DirectionToStr(*move), "🤤"
 }
 
-func isRightEdge(coord datatypes.Coord, board datatypes.Board) bool {
-	return coord.X == board.Width - 1
-}
-
-
-func isBottomEdge(coord datatypes.Coord, board datatypes.Board) bool {
-	_ = board
-	return coord.Y == 0
-}
-
-func isLeftEdge(coord datatypes.Coord, board datatypes.Board) bool {
-	_ = board
-	return coord.X == 0
-}
-
-func ChooseMove(g datatypes.GameRequest) string {
-	var gameState = g.Board
-	var you = g.You
+func AnyOtherMove(request datatypes.GameRequest) datatypes.Direction {
+	/*
+	A simple and buggy algorithm to use if all else fails. Tries not to hit itself
+	or run out of bounds.
+	 */
+	var board = request.Board
+	var you = request.You
 
 	availableMoves := datatypes.AllDirections
 
-	availableMoves = borderCheck(you, gameState, availableMoves)
+	availableMoves = borderCheck(you, board, availableMoves)
 
 	availableMoves = stopHittingYourself(you, availableMoves)
+	if len(availableMoves) == 0 {
+		// Ruh roh
+		fmt.Println("AnyOtherMove: no available moves, picking 'Up'")
+		return datatypes.DirectionUp
+	} else {
+		return availableMoves[rand.Intn(len(availableMoves))]
+	}
+}
 
-	move := availableMoves[rand.Intn(len(availableMoves))]
+func GoToFood(request *datatypes.GameRequest) *datatypes.Direction {
+	graph := dijkstra.GetDijkstraGraph(request)
 
-	return datatypes.DirectionToStr(move)
+	head := request.You.Head
+	var food datatypes.Coord
+	var move *datatypes.Direction
+	for _, food = range request.Board.Food {
+		move = dijkstra.GetDijkstraPathDirection(head, food, graph)
+		if move != nil {
+			fmt.Printf("GoToFood: Path found to food %s\n", datatypes.CoordToString(food))
+			break
+		}
+		fmt.Printf("GoToFood: Path not found to food %s\n", datatypes.CoordToString(food))
+	}
+	return move
+}
+
+func FollowTail(request *datatypes.GameRequest) *datatypes.Direction {
+	graph := dijkstra.GetDijkstraGraph(request)
+	head := request.You.Head
+	tail := request.You.Body[len(request.You.Body) - 1]
+	return dijkstra.GetDijkstraPathDirection(head, tail, graph)
 }
 
 func borderCheck(you datatypes.Battlesnake, board datatypes.Board, availableMoves []datatypes.Direction) []datatypes.Direction {
-	if isTopEdge(you.Head, board) {
+	if datatypes.IsTopEdge(you.Head, board) {
 		availableMoves = removeDirection(availableMoves, datatypes.DirectionUp)
 	}
-	if isRightEdge(you.Head, board) {
+	if datatypes.IsRightEdge(you.Head, board) {
 		availableMoves = removeDirection(availableMoves, datatypes.DirectionRight)
 	}
-	if isBottomEdge(you.Head, board) {
+	if datatypes.IsBottomEdge(you.Head, board) {
 		availableMoves = removeDirection(availableMoves, datatypes.DirectionDown)
 	}
-	if isLeftEdge(you.Head, board) {
+	if datatypes.IsLeftEdge(you.Head, board) {
 		availableMoves = removeDirection(availableMoves, datatypes.DirectionLeft)
 	}
 	return availableMoves
@@ -69,9 +105,8 @@ func stopHittingYourself(you datatypes.Battlesnake, avaliableDirections []dataty
 	var excludedDirections []datatypes.Direction
 	for _, dir := range avaliableDirections {
 		nextCoord := datatypes.AddDirectionToCoord(you.Head, dir)
-		tail := you.Body[you.Length-1]
 		for _, bodyCoord := range you.Body {
-			if nextCoord == bodyCoord && nextCoord != tail || nextCoord == bodyCoord && you.Length < 3 {
+			if nextCoord == bodyCoord {
 				excludedDirections = append(excludedDirections, dir)
 				break
 			}

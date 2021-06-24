@@ -9,6 +9,37 @@ import (
 	"net/http"
 )
 
+type RequestLogger map[string][]datatypes.GameRequest
+
+var requestLogger RequestLogger
+var latestGame string
+
+func getRequestLogger() RequestLogger {
+	if requestLogger == nil {
+		requestLogger = make(RequestLogger)
+	}
+	return requestLogger
+}
+
+func logRequest(request datatypes.GameRequest) {
+	logger := getRequestLogger()
+	latestGame = request.Game.ID
+	logger[request.Game.ID] = append(logger[request.Game.ID], request)
+}
+
+func HandleLatestLog(w http.ResponseWriter, r *http.Request) {
+	response := getRequestLogger()[latestGame]
+	if response == nil {
+		response = []datatypes.GameRequest{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	err := json.NewEncoder(w).Encode(response)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func GetServerInfo() datatypes.BattlesnakeInfoResponse {
 	return datatypes.BattlesnakeInfoResponse{
 		APIVersion: "1",
@@ -41,6 +72,7 @@ func HandleStart(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	logRequest(request)
 
 	// Nothing to respond with here
 	fmt.Print("START\n")
@@ -55,12 +87,13 @@ func HandleMove(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	logRequest(request)
 
-	move := snake.ChooseMove(request)
+	move, shout := snake.ChooseMove(request)
 
 	response := datatypes.MoveResponse{
 		Move: move,
-		Shout: "Hiyaa!",
+		Shout: shout,
 	}
 
 	fmt.Printf("MOVE: %s\n", response.Move)
@@ -79,6 +112,7 @@ func HandleEnd(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	logRequest(request)
 
 	// Nothing to respond with here
 	fmt.Print("END\n")
