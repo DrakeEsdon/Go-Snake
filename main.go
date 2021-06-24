@@ -15,6 +15,7 @@ func main() {
 	}
 
 	http.HandleFunc("/", api.HandleIndex)
+	http.HandleFunc("/latestlog", api.HandleLatestLog)
 	http.HandleFunc("/start", api.HandleStart)
 	http.HandleFunc("/move", api.HandleMove)
 	http.HandleFunc("/end", api.HandleEnd)

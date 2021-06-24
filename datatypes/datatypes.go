@@ -1,6 +1,8 @@
 package datatypes
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Game struct {
 	ID      string `json:"id"`
