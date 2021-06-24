@@ -12,10 +12,10 @@ func ChooseMove(request datatypes.GameRequest) (string, string) {
 
 	if request.You.Health > 50 {
 		fmt.Println("Health > 50, following tail")
-		move = FollowTail(request)
+		move = FollowTail(&request)
 	} else {
 		fmt.Println("Health < 50, going for food")
-		move = GoToFood(request)
+		move = GoToFood(&request)
 	}
 
 	if move == nil {
@@ -49,8 +49,8 @@ func AnyOtherMove(request datatypes.GameRequest) datatypes.Direction {
 	}
 }
 
-func GoToFood(request datatypes.GameRequest) *datatypes.Direction {
-	graph := dijkstra.GetDijkstraGraph(request.Board)
+func GoToFood(request *datatypes.GameRequest) *datatypes.Direction {
+	graph := dijkstra.GetDijkstraGraph(request)
 
 	head := request.You.Head
 	var food datatypes.Coord
@@ -66,8 +66,8 @@ func GoToFood(request datatypes.GameRequest) *datatypes.Direction {
 	return move
 }
 
-func FollowTail(request datatypes.GameRequest) *datatypes.Direction {
-	graph := dijkstra.GetDijkstraGraph(request.Board)
+func FollowTail(request *datatypes.GameRequest) *datatypes.Direction {
+	graph := dijkstra.GetDijkstraGraph(request)
 	head := request.You.Head
 	tail := request.You.Body[len(request.You.Body) - 1]
 	return dijkstra.GetDijkstraPathDirection(head, tail, graph)

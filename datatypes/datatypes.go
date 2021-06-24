@@ -76,6 +76,10 @@ func IsOutOfBounds(coord Coord, board Board) bool {
 	return x < 0 || x >= board.Width || y < 0 || y >= board.Height
 }
 
+func IsMyTail(coord Coord, myself Battlesnake) bool {
+	return coord == myself.Body[len(myself.Body) - 1]
+}
+
 func IsTopEdge(coord Coord, board Board) bool {
 	return coord.Y == board.Height-1
 }

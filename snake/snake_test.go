@@ -25,3 +25,6 @@ func TestRemoveDirection(t *testing.T) {
 	actualDirs = removeDirection(allDirs, datatypes.DirectionLeft)
 	assert.Equal(t, expectedDirs, actualDirs)
 }
+
+func TestFollowTail(t *testing.T) {
+}

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func getTestBoard() Board {
+func GetTestBoard() Board {
 	return Board{
 		Height:  10,
 		Width:   10,
@@ -31,7 +31,7 @@ func getTestBoard() Board {
 }
 
 func TestIsOutOfBounds(t *testing.T) {
-	b := getTestBoard()
+	b := GetTestBoard()
 
 	for x := 0; x < b.Width; x++ {
 		for y := 0; y < b.Height; y++ {
@@ -53,7 +53,7 @@ func TestIsOutOfBounds(t *testing.T) {
 }
 
 func TestIsSnakeOrHazard(t *testing.T) {
-	b := getTestBoard()
+	b := GetTestBoard()
 
 	assert.False(t, IsSnakeOrHazard(Coord{1, 1}, b))
 	assert.True(t, IsSnakeOrHazard(Coord{0, 1}, b))
