@@ -12,12 +12,17 @@ var turnsSinceEating = 0
 func ChooseMove(request datatypes.GameRequest) (string, string) {
 	var move *datatypes.Direction
 
-	const findFoodHealthThreshold = 20
+	const findFoodHealthThreshold = 50
 
 	if request.Turn > 5 {
 		if request.You.Health > findFoodHealthThreshold {
-			fmt.Printf("Health > %v, following tail\n", findFoodHealthThreshold)
-			move = FollowTail(&request)
+			if isLargestSnake(request.You, request) {
+				fmt.Printf("Health > %v and largest snake, following tail\n", findFoodHealthThreshold)
+				move = FollowTail(&request)
+			} else {
+				fmt.Printf("Not largest snake, going for food\n")
+				move = GoToFood(&request)
+			}
 		} else {
 			fmt.Printf("Health < %v, going for food\n", findFoodHealthThreshold)
 			move = GoToFood(&request)
@@ -37,6 +42,17 @@ func ChooseMove(request datatypes.GameRequest) (string, string) {
 	turnsSinceEating += 1
 
 	return datatypes.DirectionToStr(*move), "🤤"
+}
+
+func isLargestSnake(snake datatypes.Battlesnake, request datatypes.GameRequest) bool {
+	for _, otherSnake := range request.Board.Snakes {
+		if snake.ID != otherSnake.ID {
+			if snake.Length <= otherSnake.Length {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func canGoForTail() bool {
