@@ -10,12 +10,14 @@ import (
 func ChooseMove(request datatypes.GameRequest) (string, string) {
 	var move *datatypes.Direction
 
+	const findFoodHealthThreshold = 100
+
 	if request.Turn > 5 {
-		if request.You.Health > 50 {
-			fmt.Println("Health > 50, following tail")
+		if request.You.Health > findFoodHealthThreshold {
+			fmt.Printf("Health > %v, following tail\n", findFoodHealthThreshold)
 			move = FollowTail(&request)
 		} else {
-			fmt.Println("Health < 50, going for food")
+			fmt.Printf("Health < %v, going for food\n", findFoodHealthThreshold)
 			move = GoToFood(&request)
 		}
 	}
