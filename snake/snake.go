@@ -10,7 +10,7 @@ import (
 func ChooseMove(request datatypes.GameRequest) (string, string) {
 	var move *datatypes.Direction
 
-	const findFoodHealthThreshold = 100
+	const findFoodHealthThreshold = 20
 
 	if request.Turn > 5 {
 		if request.You.Health > findFoodHealthThreshold {
