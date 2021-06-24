@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/DrakeEsdon/Go-Snake/datatypes"
 	"github.com/DrakeEsdon/Go-Snake/dijkstra"
+	"math"
 	"math/rand"
 )
 
@@ -86,23 +87,28 @@ func GoToFood(request *datatypes.GameRequest) *datatypes.Direction {
 
 	head := request.You.Head
 	var food datatypes.Coord
-	var move *datatypes.Direction
+	var bestFoodDistance = math.MaxInt64
+	var bestMove *datatypes.Direction
 	for _, food = range request.Board.Food {
-		move = dijkstra.GetDijkstraPathDirection(head, food, graph)
+		move, distance := dijkstra.GetDijkstraPathDirection(head, food, graph)
 		if move != nil {
 			fmt.Printf("GoToFood: Path found to food %s\n", datatypes.CoordToString(food))
-			break
+			if distance < bestFoodDistance {
+				bestFoodDistance = distance
+				bestMove = move
+			}
 		}
 		fmt.Printf("GoToFood: Path not found to food %s\n", datatypes.CoordToString(food))
 	}
-	return move
+	return bestMove
 }
 
 func FollowTail(request *datatypes.GameRequest) *datatypes.Direction {
 	graph := dijkstra.GetDijkstraGraph(request, canGoForTail())
 	head := request.You.Head
 	tail := request.You.Body[len(request.You.Body) - 1]
-	return dijkstra.GetDijkstraPathDirection(head, tail, graph)
+	move, _ := dijkstra.GetDijkstraPathDirection(head, tail, graph)
+	return move
 }
 
 func borderCheck(you datatypes.Battlesnake, board datatypes.Board, availableMoves []datatypes.Direction) []datatypes.Direction {
