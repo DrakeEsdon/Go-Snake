@@ -56,11 +56,11 @@ func HandleMove(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	move := snake.ChooseMove(request)
+	move, shout := snake.ChooseMove(request)
 
 	response := datatypes.MoveResponse{
 		Move: move,
-		Shout: "Hiyaa!",
+		Shout: shout,
 	}
 
 	fmt.Printf("MOVE: %s\n", response.Move)
