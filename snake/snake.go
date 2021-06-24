@@ -1,26 +1,30 @@
 package snake
 
 import (
+	"fmt"
 	"github.com/DrakeEsdon/Go-Snake/datatypes"
 	"github.com/DrakeEsdon/Go-Snake/dijkstra"
 	"math/rand"
 )
 
-func ChooseMove(request datatypes.GameRequest) string {
+func ChooseMove(request datatypes.GameRequest) (string, string) {
 	var move *datatypes.Direction
 
 	if request.You.Health > 50 {
+		fmt.Println("Health > 50, following tail")
 		move = FollowTail(request)
 	} else {
+		fmt.Println("Health < 50, going for food")
 		move = GoToFood(request)
 	}
 
 	if move == nil {
+		fmt.Println("Move was nil, doing any other move")
 		moveValue := AnyOtherMove(request)
 		move = &moveValue
 	}
 
-	return datatypes.DirectionToStr(*move)
+	return datatypes.DirectionToStr(*move), "🤤"
 }
 
 func AnyOtherMove(request datatypes.GameRequest) datatypes.Direction {
@@ -36,10 +40,13 @@ func AnyOtherMove(request datatypes.GameRequest) datatypes.Direction {
 	availableMoves = borderCheck(you, board, availableMoves)
 
 	availableMoves = stopHittingYourself(you, availableMoves)
-
-	move := availableMoves[rand.Intn(len(availableMoves))]
-
-	return move
+	if len(availableMoves) == 0 {
+		// Ruh roh
+		fmt.Println("AnyOtherMove: no available moves, picking 'Up'")
+		return datatypes.DirectionUp
+	} else {
+		return availableMoves[rand.Intn(len(availableMoves))]
+	}
 }
 
 func GoToFood(request datatypes.GameRequest) *datatypes.Direction {
@@ -51,8 +58,10 @@ func GoToFood(request datatypes.GameRequest) *datatypes.Direction {
 	for _, food = range request.Board.Food {
 		move = dijkstra.GetDijkstraPathDirection(head, food, graph)
 		if move != nil {
+			fmt.Printf("GoToFood: Path found to food %s\n", datatypes.CoordToString(food))
 			break
 		}
+		fmt.Printf("GoToFood: Path not found to food %s\n", datatypes.CoordToString(food))
 	}
 	return move
 }
