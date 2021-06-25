@@ -19,15 +19,21 @@ func ChooseMove(request datatypes.GameRequest) (string, string) {
 	const findFoodHealthThreshold = 90
 	var foodMove = GoToFood(&request, graph)
 	var tailMove = FollowTail(&request, graph)
+	var shout string
 
 	if foodMove != nil {
+		fmt.Println("GoToFood")
 		move = foodMove
+		shout = "🤤"
 	} else if tailMove != nil {
+		fmt.Println("Falling back to FollowTail")
 		move = tailMove
+		shout = "🐍"
 	} else {
 		fmt.Println("Falling back to AnyOtherMove")
 		moveValue := AnyOtherMove(request)
 		move = &moveValue
+		shout = "😳"
 	}
 
 	destCoord := datatypes.AddDirectionToCoord(request.You.Head, *move)
@@ -36,7 +42,7 @@ func ChooseMove(request datatypes.GameRequest) (string, string) {
 	}
 	turnsSinceEating += 1
 
-	return datatypes.DirectionToStr(*move), "🤤"
+	return datatypes.DirectionToStr(*move), shout
 }
 
 func isLargestSnake(snake datatypes.Battlesnake, request datatypes.GameRequest) bool {
@@ -90,8 +96,9 @@ func GoToFood(request *datatypes.GameRequest, graph *dijkstra2.Graph) *datatypes
 				bestFoodDistance = distance
 				bestMove = move
 			}
+		} else {
+			fmt.Printf("GoToFood: Path not found to food %s\n", datatypes.CoordToString(food))
 		}
-		fmt.Printf("GoToFood: Path not found to food %s\n", datatypes.CoordToString(food))
 	}
 	return bestMove
 }
