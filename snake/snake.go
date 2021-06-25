@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/DrakeEsdon/Go-Snake/datatypes"
 	"github.com/DrakeEsdon/Go-Snake/dijkstra"
+	dijkstra2 "github.com/RyanCarrier/dijkstra"
 	"math"
 	"math/rand"
 )
@@ -12,26 +13,19 @@ var turnsSinceEating = 0
 
 func ChooseMove(request datatypes.GameRequest) (string, string) {
 	var move *datatypes.Direction
+	var graph *dijkstra2.Graph = dijkstra.GetDijkstraGraph(&request, canGoForTail(&request))
 
-	const findFoodHealthThreshold = 50
 
-	if request.Turn > 5 {
-		if request.You.Health > findFoodHealthThreshold {
-			if isLargestSnake(request.You, request) {
-				fmt.Printf("Health > %v and largest snake, following tail\n", findFoodHealthThreshold)
-				move = FollowTail(&request)
-			} else {
-				fmt.Printf("Not largest snake, going for food\n")
-				move = GoToFood(&request)
-			}
-		} else {
-			fmt.Printf("Health < %v, going for food\n", findFoodHealthThreshold)
-			move = GoToFood(&request)
-		}
-	}
+	const findFoodHealthThreshold = 90
+	var foodMove = GoToFood(&request, graph)
+	var tailMove = FollowTail(&request, graph)
 
-	if move == nil {
-		fmt.Println("Move was nil, doing any other move")
+	if foodMove != nil {
+		move = foodMove
+	} else if tailMove != nil {
+		move = tailMove
+	} else {
+		fmt.Println("Falling back to AnyOtherMove")
 		moveValue := AnyOtherMove(request)
 		move = &moveValue
 	}
@@ -56,8 +50,8 @@ func isLargestSnake(snake datatypes.Battlesnake, request datatypes.GameRequest) 
 	return true
 }
 
-func canGoForTail() bool {
-	return turnsSinceEating > 1
+func canGoForTail(request *datatypes.GameRequest) bool {
+	return turnsSinceEating > 1 && request.Turn > 4
 }
 
 func AnyOtherMove(request datatypes.GameRequest) datatypes.Direction {
@@ -72,7 +66,7 @@ func AnyOtherMove(request datatypes.GameRequest) datatypes.Direction {
 
 	availableMoves = borderCheck(you, board, availableMoves)
 
-	availableMoves = stopHittingYourself(you, availableMoves)
+	availableMoves = stopHittingOtherSnakes(you, &request, availableMoves)
 	if len(availableMoves) == 0 {
 		// Ruh roh
 		fmt.Println("AnyOtherMove: no available moves, picking 'Up'")
@@ -82,8 +76,7 @@ func AnyOtherMove(request datatypes.GameRequest) datatypes.Direction {
 	}
 }
 
-func GoToFood(request *datatypes.GameRequest) *datatypes.Direction {
-	graph := dijkstra.GetDijkstraGraph(request, canGoForTail())
+func GoToFood(request *datatypes.GameRequest, graph *dijkstra2.Graph) *datatypes.Direction {
 
 	head := request.You.Head
 	var food datatypes.Coord
@@ -103,8 +96,7 @@ func GoToFood(request *datatypes.GameRequest) *datatypes.Direction {
 	return bestMove
 }
 
-func FollowTail(request *datatypes.GameRequest) *datatypes.Direction {
-	graph := dijkstra.GetDijkstraGraph(request, canGoForTail())
+func FollowTail(request *datatypes.GameRequest, graph *dijkstra2.Graph) *datatypes.Direction {
 	head := request.You.Head
 	tail := request.You.Body[len(request.You.Body) - 1]
 	move, _ := dijkstra.GetDijkstraPathDirection(head, tail, graph)
@@ -129,22 +121,24 @@ func borderCheck(you datatypes.Battlesnake, board datatypes.Board, availableMove
 
 func removeDirection(s []datatypes.Direction, r datatypes.Direction) []datatypes.Direction {
 	var resultDirs []datatypes.Direction
-	for i, v := range s {
+	for _, v := range s {
 		if v != r {
-			resultDirs = append(resultDirs, s[i])
+			resultDirs = append(resultDirs, v)
 		}
 	}
 	return resultDirs
 }
 
-func stopHittingYourself(you datatypes.Battlesnake, avaliableDirections []datatypes.Direction) []datatypes.Direction{
+func stopHittingOtherSnakes(you datatypes.Battlesnake, request *datatypes.GameRequest, avaliableDirections []datatypes.Direction) []datatypes.Direction{
 	var excludedDirections []datatypes.Direction
 	for _, dir := range avaliableDirections {
 		nextCoord := datatypes.AddDirectionToCoord(you.Head, dir)
-		for _, bodyCoord := range you.Body {
-			if nextCoord == bodyCoord {
-				excludedDirections = append(excludedDirections, dir)
-				break
+		for _, snake := range request.Board.Snakes {
+			for _, bodyCoord := range snake.Body {
+				if nextCoord == bodyCoord {
+					excludedDirections = append(excludedDirections, dir)
+					break
+				}
 			}
 		}
 	}
