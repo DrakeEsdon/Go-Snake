@@ -72,7 +72,6 @@ func HandleStart(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	logRequest(request)
 
 	// Nothing to respond with here
 	fmt.Print("START\n")
@@ -87,7 +86,6 @@ func HandleMove(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	logRequest(request)
 
 	move, shout := snake.ChooseMove(request)
 
@@ -112,7 +110,6 @@ func HandleEnd(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	logRequest(request)
 
 	// Nothing to respond with here
 	fmt.Print("END\n")

@@ -8,17 +8,26 @@ import (
 
 func addGameStateToGraph(request *datatypes.GameRequest, g *dijkstra.Graph, canGoToTail bool) *dijkstra.Graph {
 	board := &request.Board
+	you := request.You
+	dangerousSnakeMoves := GetPossibleMovesOfEqualOrLargerSnakes(request)
 	for x := 0; x < board.Width; x++ {
 		for y := 0; y < board.Height; y++ {
 			coordA := datatypes.Coord{X: x, Y: y}
 			for _, direction := range datatypes.AllDirections {
 				coordB := datatypes.AddDirectionToCoord(coordA, direction)
+				var distance int64 = 1
+				if coordA == you.Head {
+					_, found := FindCoordInList(dangerousSnakeMoves, coordB)
+					if found {
+						distance += 99
+					}
+
+				}
 				if !datatypes.IsOutOfBounds(coordB, *board) {
 					if !datatypes.IsSnake(coordB, *board) ||
 					    (datatypes.IsMyTail(coordB, request.You) && canGoToTail) {
-						var distance int64 = 1
 						if datatypes.IsHazard(coordB, *board) {
-							distance = 15
+							distance += 14
 						}
 						g.AddMappedVertex(datatypes.CoordToString(coordA))
 						g.AddMappedVertex(datatypes.CoordToString(coordB))
@@ -89,4 +98,36 @@ func GetDijkstraPathDirection(from, to datatypes.Coord, graph *dijkstra.Graph) (
 		// Something went wrong...
 		return nil, errorLength
 	}
+}
+
+func GetPossibleMovesOfSnake(battlesnake datatypes.Battlesnake) []datatypes.Coord {
+	possibleCoords := make([]datatypes.Coord, 0)
+	for _, dir := range datatypes.AllDirections {
+		destCoord := datatypes.AddDirectionToCoord(battlesnake.Head, dir)
+		possibleCoords = append(possibleCoords, destCoord)
+	}
+	return possibleCoords
+}
+
+func GetPossibleMovesOfEqualOrLargerSnakes(request *datatypes.GameRequest) []datatypes.Coord {
+	possibleCoords := make([]datatypes.Coord, 0)
+	for _, snake := range request.Board.Snakes {
+		if snake.ID != request.You.ID && snake.Length >= request.You.Length {
+			snakeCoords := GetPossibleMovesOfSnake(snake)
+			for _, coord := range snakeCoords {
+				possibleCoords = append(possibleCoords, coord)
+			}
+		}
+	}
+	return possibleCoords
+}
+
+
+func FindCoordInList(slice []datatypes.Coord, element datatypes.Coord) (int, bool) {
+	for i, item := range slice {
+		if item == element {
+			return i, true
+		}
+	}
+	return -1, false
 }
