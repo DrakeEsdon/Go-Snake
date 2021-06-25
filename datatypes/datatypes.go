@@ -52,17 +52,21 @@ type MoveResponse struct {
 	Shout string `json:"shout,omitempty"`
 }
 
-func IsSnakeOrHazard(coord Coord, board Board) bool {
-	for _, snake := range board.Snakes {
-		for _, snakeCoord := range snake.Body {
-			if coord == snakeCoord {
+func IsHazard(coord Coord, board Board) bool {
+	if board.Hazards != nil {
+		for _, hazardCoord := range board.Hazards {
+			if coord == hazardCoord {
 				return true
 			}
 		}
 	}
-	if board.Hazards != nil {
-		for _, hazardCoord := range board.Hazards {
-			if coord == hazardCoord {
+	return false
+}
+
+func IsSnake(coord Coord, board Board) bool {
+	for _, snake := range board.Snakes {
+		for _, snakeCoord := range snake.Body {
+			if coord == snakeCoord {
 				return true
 			}
 		}

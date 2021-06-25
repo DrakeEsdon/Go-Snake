@@ -52,13 +52,22 @@ func TestIsOutOfBounds(t *testing.T) {
 	assert.True(t, IsOutOfBounds(Coord{-1, 9}, b))
 }
 
-func TestIsSnakeOrHazard(t *testing.T) {
+func TestIsHazard(t *testing.T) {
 	b := GetTestBoard()
 
-	assert.False(t, IsSnakeOrHazard(Coord{1, 1}, b))
-	assert.True(t, IsSnakeOrHazard(Coord{0, 1}, b))
-	assert.False(t, IsSnakeOrHazard(Coord{0, 0}, b)) // Food is ok
-	assert.True(t, IsSnakeOrHazard(Coord{7, 9}, b))
+	assert.False(t, IsHazard(Coord{1, 1}, b))
+	assert.True(t, IsHazard(Coord{0, 1}, b))
+	assert.False(t, IsHazard(Coord{0, 0}, b)) // Food is ok
+	assert.False(t, IsHazard(Coord{7, 9}, b))
+}
+
+func TestIsSnake(t *testing.T) {
+	b := GetTestBoard()
+
+	assert.False(t, IsSnake(Coord{1, 1}, b))
+	assert.False(t, IsSnake(Coord{0, 1}, b))
+	assert.False(t, IsSnake(Coord{0, 0}, b)) // Food is ok
+	assert.True(t, IsSnake(Coord{7, 9}, b))
 }
 
 func TestCoordToString(t *testing.T) {

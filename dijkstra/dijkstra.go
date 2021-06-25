@@ -13,18 +13,23 @@ func addGameStateToGraph(request *datatypes.GameRequest, g *dijkstra.Graph, canG
 			coordA := datatypes.Coord{X: x, Y: y}
 			for _, direction := range datatypes.AllDirections {
 				coordB := datatypes.AddDirectionToCoord(coordA, direction)
-				if !datatypes.IsOutOfBounds(coordB, *board) &&
-					(!datatypes.IsSnakeOrHazard(coordB, *board) ||
-					    (datatypes.IsMyTail(coordB, request.You) && canGoToTail)) {
-					g.AddMappedVertex(datatypes.CoordToString(coordA))
-					g.AddMappedVertex(datatypes.CoordToString(coordB))
-					err := g.AddMappedArc(
-						datatypes.CoordToString(coordA),
-						datatypes.CoordToString(coordB),
-						1,
-					)
-					if err != nil {
-						return nil
+				if !datatypes.IsOutOfBounds(coordB, *board) {
+					if !datatypes.IsSnake(coordB, *board) ||
+					    (datatypes.IsMyTail(coordB, request.You) && canGoToTail) {
+						var distance int64 = 1
+						if datatypes.IsHazard(coordB, *board) {
+							distance = 15
+						}
+						g.AddMappedVertex(datatypes.CoordToString(coordA))
+						g.AddMappedVertex(datatypes.CoordToString(coordB))
+						err := g.AddMappedArc(
+							datatypes.CoordToString(coordA),
+							datatypes.CoordToString(coordB),
+							distance,
+						)
+						if err != nil {
+							return nil
+						}
 					}
 				}
 			}
