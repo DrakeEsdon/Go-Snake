@@ -8,7 +8,7 @@ import (
 func TestGetServerInfo(t *testing.T) {
 	expectedAPIVersion := "1"
 	expectedAuthor := "DrakeEsdon & HugoKlepsch"
-	expectedColor := "#03fcf4"
+	expectedColor := "#dcc010"
 	expectedHead := "fang"
 	expectedTail := "pixel"
 	var actual = GetServerInfo()

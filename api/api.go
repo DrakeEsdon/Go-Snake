@@ -44,7 +44,7 @@ func GetServerInfo() datatypes.BattlesnakeInfoResponse {
 	return datatypes.BattlesnakeInfoResponse{
 		APIVersion: "1",
 		Author:     "DrakeEsdon & HugoKlepsch",
-		Color:      "#03fcf4",
+		Color:      "#dcc010",
 		Head:       "fang",
 		Tail:       "pixel",
 	}
